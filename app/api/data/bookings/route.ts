@@ -1,7 +1,11 @@
 import { NextResponse } from "next/server"
+import type { HotelBooking, RestaurantBooking } from "@/lib/types"
 
 // In-memory booking storage (in production, this would be persistent)
-const bookingsStore = {
+const bookingsStore: {
+  hotelBookings: HotelBooking[]
+  restaurantBookings: RestaurantBooking[]
+} = {
   hotelBookings: [],
   restaurantBookings: [],
 }
@@ -12,11 +16,11 @@ export async function GET() {
 
 export async function POST(request: Request) {
   try {
-    const { type, booking } = await request.json()
+    const { type, booking }: { type: string; booking: HotelBooking | RestaurantBooking } = await request.json()
     if (type === "hotel") {
-      bookingsStore.hotelBookings.push(booking)
+      bookingsStore.hotelBookings.push(booking as HotelBooking)
     } else {
-      bookingsStore.restaurantBookings.push(booking)
+      bookingsStore.restaurantBookings.push(booking as RestaurantBooking)
     }
     return NextResponse.json(booking, { status: 201 })
   } catch (error) {
@@ -28,11 +32,11 @@ export async function DELETE(request: Request) {
   try {
     const { type, bookingId } = await request.json()
     if (type === "hotel") {
-      bookingsStore.hotelBookings = bookingsStore.hotelBookings.map((b: any) =>
+      bookingsStore.hotelBookings = bookingsStore.hotelBookings.map((b) =>
         b.id === bookingId ? { ...b, status: "cancelled" } : b,
       )
     } else {
-      bookingsStore.restaurantBookings = bookingsStore.restaurantBookings.map((b: any) =>
+      bookingsStore.restaurantBookings = bookingsStore.restaurantBookings.map((b) =>
         b.id === bookingId ? { ...b, status: "cancelled" } : b,
       )
     }
